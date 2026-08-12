@@ -1,0 +1,45 @@
+{
+  "name": "@medicare-hub/backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "start:prod": "NODE_ENV=production node src/server.js",
+    "lint": "eslint .",
+    "test": "NODE_ENV=test vitest run",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:prod": "NODE_ENV=production sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:seed:demo": "NODE_ENV=production sequelize-cli db:seed:all",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all",
+    "db:reset": "sequelize-cli db:seed:undo:all && sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "mysql2": "^3.14.4",
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.34.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
+  }
+}
