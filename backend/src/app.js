@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env.js';
+import { ForbiddenError } from './errors/AppError.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { requestLogger } from './middlewares/requestLogger.js';
@@ -32,7 +33,11 @@ app.use(
         return;
       }
 
-      callback(new Error(`Origin ${normalizedOrigin} not allowed by CORS`));
+      callback(
+        new ForbiddenError(
+          `CORS origin non consentita: ${normalizedOrigin}. Verificare CORS_ORIGIN nel backend Railway.`
+        )
+      );
     }
   })
 );
