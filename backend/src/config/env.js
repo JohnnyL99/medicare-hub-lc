@@ -23,7 +23,7 @@ function parseTrustProxy(value) {
   }
 
   if (value === 'true') {
-    return true;
+    return 1;
   }
 
   if (value === 'false') {
