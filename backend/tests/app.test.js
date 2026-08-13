@@ -46,6 +46,7 @@ function createToken(payload = {}) {
 describe('API', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    env.corsAllowedOrigins = ['http://localhost:5173'];
   });
 
   it('returns standard success response for GET /health', async () => {
@@ -53,6 +54,41 @@ describe('API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data.status).toBe('ok');
+  });
+
+  it('allows requests from configured CORS origins', async () => {
+    env.corsAllowedOrigins = ['https://medicare-hub.vercel.app'];
+
+    const response = await request(app)
+      .get('/health')
+      .set('Origin', 'https://medicare-hub.vercel.app');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['access-control-allow-origin']).toBe(
+      'https://medicare-hub.vercel.app'
+    );
+  });
+
+  it('normalizes trailing slash in configured CORS origins', async () => {
+    env.corsAllowedOrigins = ['https://medicare-hub.vercel.app'];
+
+    const response = await request(app)
+      .get('/health')
+      .set('Origin', 'https://medicare-hub.vercel.app/');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['access-control-allow-origin']).toBe(
+      'https://medicare-hub.vercel.app/'
+    );
+  });
+
+  it('rejects requests from non configured CORS origins', async () => {
+    env.corsAllowedOrigins = ['https://medicare-hub.vercel.app'];
+
+    const response = await request(app).get('/health').set('Origin', 'https://evil.example.com');
+
+    expect(response.status).toBe(500);
+    expect(response.body.error.code).toBe('INTERNAL_SERVER_ERROR');
   });
 
   it('builds a swagger spec with documented operations', () => {

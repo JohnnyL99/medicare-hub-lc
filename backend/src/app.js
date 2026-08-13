@@ -19,7 +19,21 @@ if (env.trustProxy !== false) {
 app.use(helmet());
 app.use(
   cors({
-    origin: env.corsOrigin.split(',').map((origin) => origin.trim())
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = origin.replace(/\/+$/, '');
+
+      if (env.corsAllowedOrigins.includes(normalizedOrigin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${normalizedOrigin} not allowed by CORS`));
+    }
   })
 );
 app.use(
