@@ -4,6 +4,14 @@ export function errorHandler(err, _req, res, _next) {
   const message = isOperational ? err.message : 'Internal Server Error';
   const details = Array.isArray(err.details) ? err.details : [];
 
+  console.error('[errorHandler]', {
+    code: err.code || 'INTERNAL_ERROR',
+    statusCode,
+    message: err.message,
+    details,
+    stack: err.stack
+  });
+
   const payload = {
     error: {
       code: err.code || 'INTERNAL_ERROR',
