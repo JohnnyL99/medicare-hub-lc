@@ -87,8 +87,8 @@ describe('API', () => {
 
     const response = await request(app).get('/health').set('Origin', 'https://evil.example.com');
 
-    expect(response.status).toBe(500);
-    expect(response.body.error.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe('FORBIDDEN');
   });
 
   it('builds a swagger spec with documented operations', () => {
