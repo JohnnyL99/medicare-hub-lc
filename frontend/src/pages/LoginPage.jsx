@@ -18,6 +18,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import { appConfig } from '../utils/appConfig';
+import { demoAccounts } from '../utils/demoAccounts';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -54,20 +55,12 @@ export function LoginPage() {
     return Object.keys(nextErrors).length === 0;
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
-
+  async function submitCredentials(credentials) {
     setIsSubmitting(true);
+    setErrors({});
 
     try {
-      await login({
-        email: formState.email.trim().toLowerCase(),
-        password: formState.password
-      });
+      await login(credentials);
 
       showSnackbar('Accesso effettuato correttamente', 'success');
 
@@ -83,15 +76,33 @@ export function LoginPage() {
     }
   }
 
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!validate()) {
+      return;
+    }
+
+    await submitCredentials({
+      email: formState.email.trim().toLowerCase(),
+      password: formState.password
+    });
+  }
+
+  async function handleDemoLogin(demoAccount) {
+    await submitCredentials({
+      email: demoAccount.email,
+      password: demoAccount.password
+    });
+  }
+
   return (
     <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
       <CardContent sx={{ p: { xs: 3, md: 5 } }}>
         <Stack spacing={3}>
           <Stack spacing={1}>
-            <Typography variant="overline" color="primary" fontWeight={800}>
-              Accesso applicativo
-            </Typography>
             <Typography variant="h3">MediCare Hub</Typography>
+            <Typography variant="h6">Accedi al gestionale</Typography>
             <Typography variant="body1" color="text.secondary">
               Accesso al gestionale del {appConfig.clinicName}.
             </Typography>
@@ -102,6 +113,28 @@ export function LoginPage() {
               {errors.form}
             </Alert>
           ) : null}
+
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle1">Accesso rapido demo</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Accesso rapido disponibile per la dimostrazione del sistema.
+            </Typography>
+            {demoAccounts.map((demoAccount) => (
+              <Button
+                key={demoAccount.email}
+                variant="contained"
+                color={demoAccount.color}
+                size="large"
+                loading={isSubmitting}
+                disabled={isSubmitting}
+                onClick={() => handleDemoLogin(demoAccount)}
+              >
+                {demoAccount.label}
+              </Button>
+            ))}
+          </Stack>
+
+          <Divider>Accesso manuale</Divider>
 
           <Stack spacing={2} component="form" onSubmit={handleSubmit}>
             <TextField
@@ -158,8 +191,6 @@ export function LoginPage() {
               Accedi
             </Button>
           </Stack>
-
-          <Divider />
 
           <Alert severity="info" variant="outlined">
             L applicazione utilizza esclusivamente dati fittizi per scopi accademici e di

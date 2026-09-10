@@ -131,12 +131,49 @@ describe('frontend auth', () => {
     fireEvent.change(screen.getByLabelText(/^password$/i), {
       target: { value: 'Demo123!' }
     });
-    fireEvent.click(screen.getByRole('button', { name: /accedi/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^accedi$/i }));
 
     await waitFor(() => {
       expect(sessionStorage.getItem('medicareHub.accessToken')).toBe('jwt-demo-token');
     });
     expect(authApi.login).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs in with the selected demo account through the normal auth flow', async () => {
+    authApi.login.mockResolvedValue({
+      token: 'jwt-doctor-demo-token',
+      user: {
+        id: 4,
+        firstName: 'Luca',
+        lastName: 'Moretti',
+        email: 'doctor.luca.moretti@aurora.test',
+        role: 'DOCTOR',
+        doctorId: 1
+      }
+    });
+
+    renderApp(['/login']);
+
+    fireEvent.click(screen.getByRole('button', { name: /accedi come medico/i }));
+
+    await waitFor(() => {
+      expect(authApi.login).toHaveBeenCalledWith({
+        email: 'doctor.luca.moretti@aurora.test',
+        password: 'Demo123!'
+      });
+    });
+    expect(sessionStorage.getItem('medicareHub.accessToken')).toBe('jwt-doctor-demo-token');
+  });
+
+  it('shows login errors from the normal auth flow for demo access', async () => {
+    authApi.login.mockRejectedValue(new Error('Credenziali non valide'));
+
+    renderApp(['/login']);
+
+    fireEvent.click(screen.getByRole('button', { name: /accedi come receptionist/i }));
+
+    expect(await screen.findByText('Credenziali non valide')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /accedi come receptionist/i })).toBeEnabled();
   });
 
   it('blocks protected admin-only route for receptionist via role route', async () => {
